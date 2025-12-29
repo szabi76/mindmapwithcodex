@@ -1,0 +1,15 @@
+node_modules
+.dist
+coverage
+dist
+.terraform
+target
+.env
+.DS_Store
+*.log
+.cache
+pnpm-lock.yaml
+build
+terraform.tfstate*
+.aws-sam
+
