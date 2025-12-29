@@ -1,0 +1,25 @@
+{
+  "name": "mindmap-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rimraf dist && tsx --tsconfig tsconfig.build.json --no-warn --skip-node-compat && node esbuild.config.mjs",
+    "lint": "tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.569.0",
+    "@aws-sdk/client-dynamodb": "^3.569.0",
+    "@aws-sdk/lib-dynamodb": "^3.569.0",
+    "@aws-sdk/types": "^3.569.0",
+    "nanoid": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.132",
+    "@types/node": "^20.12.7",
+    "esbuild": "^0.20.2",
+    "rimraf": "^5.0.5",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  }
+}

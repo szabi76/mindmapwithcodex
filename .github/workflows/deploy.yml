@@ -1,0 +1,68 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply infrastructure changes"
+        default: false
+        required: false
+        type: boolean
+      aws_region:
+        description: "AWS Region"
+        default: "us-east-1"
+        required: false
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Build backend
+        working-directory: backend
+        run: |
+          npm install
+          npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ inputs.aws_region }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: mindmap-deploy
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform Init
+        working-directory: infra
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra
+        env:
+          TF_VAR_auth_token_owner: ${{ secrets.AUTH_TOKEN_OWNER || 'owner-demo-token' }}
+          TF_VAR_auth_token_friends: ${{ secrets.AUTH_TOKEN_FRIENDS || 'friends-demo-token' }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: inputs.apply == true
+        working-directory: infra
+        env:
+          TF_VAR_auth_token_owner: ${{ secrets.AUTH_TOKEN_OWNER || 'owner-demo-token' }}
+          TF_VAR_auth_token_friends: ${{ secrets.AUTH_TOKEN_FRIENDS || 'friends-demo-token' }}
+        run: terraform apply -auto-approve tfplan
